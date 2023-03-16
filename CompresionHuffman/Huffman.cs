@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace CompresionHuffman
 {
@@ -10,12 +12,39 @@ namespace CompresionHuffman
     {
 
         // Nodo del árbol de Huffman
-        class NodoHuffman
+        public class NodoHuffman
         {
-            public char Simbolo { get; set; }
+            public char Caracter { get; set; }
             public int Frecuencia { get; set; }
             public NodoHuffman Izquierda { get; set; }
             public NodoHuffman Derecha { get; set; }
+
+            public char Simbolo { get; set; } // propiedad Simbolo para almacenar el carácter único
+
+            public bool EsHoja()
+            {
+                return Izquierda == null && Derecha == null;
+            }
+
+            public List<NodoHuffman> ObtenerHojas(NodoHuffman nodo)
+            {
+                List<NodoHuffman> hojas = new List<NodoHuffman>();
+
+                if (nodo != null)
+                {
+                    if (nodo.EsHoja())
+                    {
+                        hojas.Add(nodo);
+                    }
+                    else
+                    {
+                        hojas.AddRange(ObtenerHojas(nodo.Izquierda));
+                        hojas.AddRange(ObtenerHojas(nodo.Derecha));
+                    }
+                }
+
+                return hojas;
+            }
         }
         // Generar el árbol de Huffman a partir de un texto
         static NodoHuffman GenerarArbolHuffman(string texto)
@@ -81,7 +110,7 @@ namespace CompresionHuffman
             GenerarCodificacionRecursiva(nodo.Izquierda, codigo + "0", codificacion);
             GenerarCodificacionRecursiva(nodo.Derecha, codigo + "1", codificacion);
         }
-        
+
         // Codificar un texto utilizando la tabla de codificación
         static string CodificarTexto(string texto, Dictionary<char, string> codificacion)
         {
@@ -151,31 +180,62 @@ namespace CompresionHuffman
             return bits;
         }
 
+        public static void ImprimirTablaHuffman(NodoHuffman raiz, string codigo)
+        {
+            if (raiz == null)
+            {
+                return;
+            }
+
+            // Si el nodo es una hoja, imprime su caracter y su código Huffman
+            if (raiz.EsHoja())
+            {
+                Console.WriteLine(raiz.Caracter + " - " + codigo);
+            }
+
+            // Recorre los nodos del árbol en orden primero por la izquierda, luego por la derecha
+            ImprimirTablaHuffman(raiz.Izquierda, codigo + "0");
+            ImprimirTablaHuffman(raiz.Derecha, codigo + "1");
+        }
+
+        public static void ImprimirArbol(NodoHuffman nodo, string prefijo = "")
+        {
+            if (nodo != null)
+            {
+                Console.WriteLine($"{prefijo}├── {(nodo.EsHoja() ? $"{nodo.Simbolo} ({nodo.Frecuencia})" : nodo.Frecuencia.ToString())}");
+
+                if (nodo.Izquierda != null || nodo.Derecha != null)
+                {
+                    ImprimirArbol(nodo.Izquierda!, prefijo + "│  ");
+                    ImprimirArbol(nodo.Derecha, prefijo + "   ");
+                }
+            }
+        }
+
         public static void Run()
         {
             // Texto a codificar
-            string texto = "Este es un ejemplo para demostrar que la compresion de Huffman no siempre reduce el tamaño de los datos";
+            var texto = File.ReadAllText("frase.txt");
 
             // Generar árbol de Huffman y tabla de codificación
-            NodoHuffman raiz = GenerarArbolHuffman(texto);
-            Dictionary<char, string> codificacion = GenerarCodificacion(raiz);
+            var raiz = GenerarArbolHuffman(texto);
+            var codificacion = GenerarCodificacion(raiz);
 
             // Codificar texto
-            string textoCodificado = CodificarTexto(texto, codificacion);
+            var textoCodificado = CodificarTexto(texto, codificacion);
 
-            int representacionBinariaTextoOriginal = ContarBits(texto);
             // Imprimir resultados
-            Console.WriteLine("Texto original: " + texto);
-            Console.WriteLine("Bits en texto original: " + representacionBinariaTextoOriginal);
             Console.WriteLine("Texto codificado: " + textoCodificado);
 
             // Decodificar texto
-            string textoDecodificado = DecodificarTexto(textoCodificado, raiz);
-            int bitsEnTextoCodifcado = ContarBits(textoCodificado);
+            var textoDecodificado = DecodificarTexto(textoCodificado, raiz);
 
             // Imprimir resultados
             Console.WriteLine("Texto decodificado: " + textoDecodificado);
-            Console.WriteLine("Bits en texto codificado: " + bitsEnTextoCodifcado);
+
+            Console.WriteLine("Arbol:");
+            ImprimirArbol(raiz);
+
         }
     }
 }

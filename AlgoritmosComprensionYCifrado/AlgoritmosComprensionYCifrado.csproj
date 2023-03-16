@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CompresionHuffman\CompresionHuffman.csproj" />
+    <ProjectReference Include="..\CompresionLempelZivWelch\CompresionLempelZivWelch.csproj" />
     <ProjectReference Include="..\RC4\RC4.csproj" />
     <ProjectReference Include="..\RSA_Algoritmo\RSA_Algoritmo.csproj" />
   </ItemGroup>

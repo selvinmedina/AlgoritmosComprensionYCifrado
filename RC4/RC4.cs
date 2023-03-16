@@ -37,7 +37,7 @@ namespace AlgoritmosComprensionYCifrado.Algoritmos
             // Paso 2a: a continuación, se crea un vector temporal T.
             int[] T = new int[256];
 
-            //  KSA Phase Step 2b: If the length of the key k is 256 bytes, then k is assigned to T.  
+            //  KSA Paso 2 2b: si el length de la key k es 256 bytes, entonces k es asignada a T.  
             if (key.Length == 256)
             {
                 Buffer.BlockCopy(key, 0, T, 0, key.Length);
